@@ -1,0 +1,10 @@
+# Ignorar buils de Docker
+build/
+compose.yml
+
+# Ignorar archivo de compilacion de gcc
+source_code/main
+
+# Ignorar data y logs de mariadb
+sql/data/
+sql/log/
