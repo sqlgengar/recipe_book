@@ -24,6 +24,8 @@ int main()
 {
     char* path_recipes = "./files/recipes.dat";
     bool flag_main_cicle = true;
+    size_t amount_recipes = 0;
+    short int autoincrement_recipes = 1;
     short int option_main_cicle = 0;
     Recipes* memory_recipes;
     FILE* stream_recipes = NULL;
@@ -51,13 +53,18 @@ int main()
     long size_file_recipes = ftell( stream_recipes );
     fclose( stream_recipes );
 
-    size_t amount_recipes = size_file_recipes / sizeof( Recipes );
+    amount_recipes = size_file_recipes / sizeof( Recipes );
 
     memory_recipes = malloc( amount_recipes * sizeof( Recipes ) );
 
     stream_recipes = fopen( path_recipes, "rb" );
     fread( memory_recipes, sizeof( Recipes ), amount_recipes, stream_recipes );
     fclose( stream_recipes );
+
+    for( size_t j = 0; j < amount_recipes; j++ )
+    {
+        if( memory_recipes[j].id > autoincrement_recipes ) autoincrement_recipes = memory_recipes[j].id;
+    }
 
     while( flag_main_cicle )
     {
@@ -73,30 +80,61 @@ int main()
         switch( option_main_cicle )
         {
             case 1:
-                while( memory_recipes != NULL )
+                for( size_t i = 0; i < amount_recipes; i++ )
                 {
-                    printf( "%d ", memory_recipes->id );
-                    printf( "%s\n", memory_recipes->name );
-
-                    memory_recipes++;
+                    printf( "%d id \n", memory_recipes[i].id );
+                    printf( "%d id_user \n", memory_recipes[i].id_user );
+                    printf( "%s name \n", memory_recipes[i].name );
+                    printf( "%hd status \n", memory_recipes[i].status );
+                    printf( "\n" );
                 }
             break;
 
             case 2:
-                printf("Ingrese el número de la receta que desea modificar: ");
-                size_t id_register;
-                scanf("%zu", &id_register);
+                printf("Ingrese el número de la receta que desea modificar:\n");
+                size_t id_register_update = 0;
+                scanf("%zu", &id_register_update);
+                fflush( stdin );
 
                 printf("Nuevo nombre: ");
-                scanf("%s", memory_recipes[id_register-1].name);
+                scanf("%s", memory_recipes[id_register_update-1].name);
+                fflush( stdin );
             break;
 
             case 3:
-                //elimiar receta;
+                printf("Ingrese el número de la receta que desea eliminar:\n");
+                size_t id_register_delete = 0;
+                scanf("%zu", &id_register_delete);
+                fflush( stdin );
+
+                memory_recipes[id_register_delete-1].status = 0;
             break;
 
             case 4:
-                //crear receta;
+                int temp_id;
+                printf( "Ingrese autoincrement: (0 para valor automatico)\n" );
+                scanf( " %d", &temp_id );
+                fflush( stdin );
+                for( size_t k = 0; k < amount_recipes; k++ )
+                {
+                    if( memory_recipes[k].id == temp_id )
+                    {
+                        printf( "Id repetido\n" );
+                        break;
+                    }
+                }
+                if( autoincrement_recipes < temp_id ) autoincrement_recipes = temp_id;
+                amount_recipes++;
+                memory_recipes = realloc( memory_recipes, amount_recipes * sizeof( Recipes ) );
+                memory_recipes[amount_recipes - 1].id = autoincrement_recipes;
+                memory_recipes[amount_recipes - 1].id_user = 1;
+                printf( "Ingrese nombre de la receta:\n" );
+                getchar();
+                fgets(memory_recipes[amount_recipes - 1].name, sizeof(memory_recipes[amount_recipes - 1].name), stdin);
+                memory_recipes[amount_recipes - 1].name[strcspn(memory_recipes[amount_recipes - 1].name, "\n")] = '\0';
+                fflush(stdin);
+                memory_recipes[amount_recipes - 1].status = true;
+                autoincrement_recipes++;
             break;
         
             default:
@@ -107,7 +145,7 @@ int main()
     }
 
     stream_recipes = fopen( path_recipes, "wb" );
-    fwrite( memory_recipes, sizeof( Recipes ), sizeof( memory_recipes ) / sizeof( Recipes ), stream_recipes );
+    fwrite( memory_recipes, sizeof( Recipes ), amount_recipes, stream_recipes );
     fclose( stream_recipes );
 
     free( memory_recipes );
