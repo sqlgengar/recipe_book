@@ -8,3 +8,6 @@ source_code/main
 # Ignorar data y logs de mariadb
 sql/data/
 sql/log/
+
+# Ignorar files app
+source_code/files/recipes.dat
