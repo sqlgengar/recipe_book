@@ -1,4 +1,5 @@
 /*******************[LIBRERIAS]*********************/
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -31,6 +32,9 @@ void main_menu();
 void menu_recipes();
 bool check_update_string( char[] );
 bool check_update_int( int );
+void update_date_register( char[] );
+bool is_repeat( int[], int, int );
+int find_autoincrement( int[], int );
 
 /*******************[MAIN]*********************/
 int main()
@@ -178,6 +182,7 @@ void menu_recipes()
             case 2:
                 // select id
                 int temp_int =              0;
+                bool is_update =            false;
                 char* temp_string =         NULL;
                 size_t id_register_update = 0;
                 
@@ -190,60 +195,167 @@ void menu_recipes()
                 scanf( " %s", temp_string );
                 fflush( stdin );
 
-                if( check_update_string ) strcpy( memory_recipes[id_register_update - 1].name, temp_string );
+                if( check_update_string )
+                {
+                    strcpy( memory_recipes[id_register_update - 1].name, temp_string );
+                    is_update = true;
+                }
 
                 // update duration
                 printf( "Nuevo tiempo de preparacion: [0 para no editar]\n" );
-                scanf( " %d", temp_int );
+                scanf( " %d", &temp_int );
                 fflush( stdin );
 
-                if( check_update_int ) memory_recipes[id_register_update - 1].duration = temp_int;
+                if( check_update_int )
+                {
+                    memory_recipes[id_register_update - 1].duration = temp_int;
+                    is_update = true;
+                }
 
                 // update level
                 printf( "Nuevo tiempo de preparacion: [0 para no editar]\n" );
-                scanf( " %d", temp_int );
+                scanf( " %d", &temp_int );
                 fflush( stdin );
 
-                if( check_update_int ) memory_recipes[id_register_update - 1].duration = temp_int;
+                if( check_update_int )
+                {
+                    memory_recipes[id_register_update - 1].level = temp_int;
+                    is_update = true;
+                }
 
+                // update parts
+                printf( "Nueva cantidad de partes: [0 para no editar]\n" );
+                scanf( " %d", &temp_int );
+                fflush( stdin );
+
+                if( check_update_int )
+                {
+                    memory_recipes[id_register_update - 1].parts = temp_int;
+                    is_update = true;
+                }
+
+                // update preparation
+                printf( "Nuevo script de preparacion: [0 para no editar]\n" );
+                scanf( " %s", temp_string );
+                fflush( stdin );
+
+                if( check_update_int )
+                {
+                    strcpy( memory_recipes[id_register_update - 1].preparation, temp_string );
+                    is_update = true;
+                }
+
+                // update date register
+                if( is_update ) update_date_register( memory_recipes[id_register_update - 1].date_update );
             break;
 
             // DELETE RECIPE
             case 3:
-                printf( "Ingrese el número de la receta que desea eliminar:\n" );
                 size_t id_register_delete = 0;
-                scanf("%zu", &id_register_delete);
+
+                printf( "Ingrese el número de la receta que desea eliminar:\n" );
+                scanf( " %zu", &id_register_delete );
                 fflush( stdin );
 
-                memory_recipes[id_register_delete-1].status = 0;
+                memory_recipes[id_register_delete - 1].status = 0;
+                
+                // update date register
+                update_date_register( memory_recipes[id_register_delete - 1].date_update );
             break;
 
             // ADD RECIPE
             case 4:
-                int temp_id;
-                printf( "Ingrese autoincrement: (0 para valor automatico)\n" );
+                int temp_id = 0;
+                int ids[];
+
+                // resolucion del id de la tabla
+                printf( "Ingrese autoincrement: [0 para valor automatico]\n" );
                 scanf( " %d", &temp_id );
                 fflush( stdin );
+
                 for( size_t k = 0; k < amount_recipes; k++ )
                 {
-                    if( memory_recipes[k].id == temp_id )
-                    {
-                        printf( "Id repetido\n" );
-                        break;
-                    }
+                    ids[k] = memory_recipes[k].id;
                 }
-                if( autoincrement_recipes < temp_id ) autoincrement_recipes = temp_id;
-                amount_recipes++;
+
+                if( is_repeat( ids, temp_id ) )
+                {
+                    printf( "Id repedito, operacion no permitida.\n" );
+                    break;
+                }
+                else
+                {
+                    autoincrement_recipes = temp_id;
+                }
+
+                if( temp_id == 0 ) autoincrement_recipes = find_autoincrement( ids, amount_recipes );
+
+                // Aumentar un espacio de memoria.
                 memory_recipes = realloc( memory_recipes, amount_recipes * sizeof( Recipes ) );
+
+                // Registar id.
                 memory_recipes[amount_recipes - 1].id = autoincrement_recipes;
+
+                // Registar id_user.
                 memory_recipes[amount_recipes - 1].id_user = 1;
+
+                // Registar name.
                 printf( "Ingrese nombre de la receta:\n" );
                 getchar();
-                fgets(memory_recipes[amount_recipes - 1].name, sizeof(memory_recipes[amount_recipes - 1].name), stdin);
-                memory_recipes[amount_recipes - 1].name[strcspn(memory_recipes[amount_recipes - 1].name, "\n")] = '\0';
-                fflush(stdin);
+                fgets( memory_recipes[amount_recipes - 1].name, sizeof( memory_recipes[amount_recipes - 1].name ), stdin );
+                memory_recipes[amount_recipes - 1].name[strcspn( memory_recipes[amount_recipes - 1].name, "\n" )] = '\0';
+                fflush( stdin );
+
+                // Registar dutarion.
+                do
+                {
+                    printf( "Ingrese duracion de receta:\n" );
+                    scanf( " %d", memory_recipes[amount_recipes - 1].duration );
+                    fflush( stdin );
+                } while( memory_recipes[amount_recipes - 1].duration >= 0 );
+
+                // Registrar level.
+                printf( "Ingrese el nivel de la receta:\n" );
+                scanf( " %d", memory_recipes[amount_recipes - 1].level );
+                fflush( stdin );
+
+                // Registrar parts.
+                do
+                {
+                    printf( "Ingrese cuantas procuones rinde la receta:\n" );
+                    scanf( " %d", memory_recipes[amount_recipes - 1].parts );
+                    fflush( stdin );
+                } while( memory_recipes[amount_recipes - 1].parts >= 0 );
+
+                // Registrar preparation.
+                printf( "Ingrese la preparion de la receta:\n" );
+                getchar();
+                fgets( memory_recipes[amount_recipes - 1].preparation, sizeof( memory_recipes[amount_recipes - 1].preparation ), stdin );
+                memory_recipes[amount_recipes - 1].preparation[strcspn( memory_recipes[amount_recipes - 1].preparation, "\n" )] = '\0';
+                fflush( stdin );
+
+                // Registrar image.
+                strcpy( memory_recipes[amount_recipes -1].image, "./images/default.jpg" );
+
+                // Registrar score.
+                memory_recipes[amount_recipes - 1].score = 0;
+
+                // Registrar date_update.
+                memory_recipes[amount_recipes - 1].date_update = NULL;
+
+                // Registrar date.
+                time_t current;
+                struct tm* info_time;
+                time( &current );
+                info_time = localtime( &current );
+
+                strtime( memory_recipes[amount_registers - 1].date, sizeof( memory_recipes[amount_registers - 1].date ), "%Y-%m-%d %H:%M:%S", info_time );
+
+                // Registrar status.
                 memory_recipes[amount_recipes - 1].status = true;
-                autoincrement_recipes++;
+
+                // Incrementar cantidad de recetas.
+                amount_recipes++;
             break;
 
             // EXIT
@@ -260,4 +372,41 @@ void menu_recipes()
 
     free( memory_recipes );
     return;
+}
+
+void update_date_register( char register_date[] )
+{
+    time_t current_time;
+    struct tm *time_info;
+    time(&current_time);
+    time_info = localtime(&current_time);
+    strftime( register_date, sizeof( register_date ), "%Y-%m-%d", time_info );
+}
+
+bool is_repeat( int ids[], int find_id, int amount_registers )
+{
+    bool repeated = false
+
+    for( int i = 0; i < amount_registers; i++ )
+    {
+        if( ids[i] == find_id )
+        {
+            repeated = true;
+            break;
+        }
+    }
+
+    return repeated;
+}
+
+int find_autoincrement( int ids[], int amount_registers )
+{
+    int autoincrement = 1;
+
+    for( int i = 0; i < amount_registers; i++ )
+    {
+        autoincrement++;
+    }
+
+    return autoincrement;
 }

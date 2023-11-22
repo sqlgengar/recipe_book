@@ -5,11 +5,11 @@ TRUNCATE recipes;
 INSERT INTO recipes
 (id_user, name, duration, level, parts, preparation, image, score, date)
 VALUES
-(FLOOR(1 + RAND() * 2), 'Pasta Carbonara', 30, 2, 4, 'Cocinar la pasta y mezclar con una salsa de huevo, queso parmesano y panceta.', CONCAT( './images/', SUBSTRING(MD5(RAND()) FROM 1 FOR 10), '.jpg' ), FLOOR(1 + RAND() * 10), NOW()),
-(FLOOR(1 + RAND() * 2), 'Ensalada César', 15, 1, 2, 'Preparar lechuga, crutones, pollo a la parrilla y aderezo de anchoas.', CONCAT( './images/', SUBSTRING(MD5(RAND()) FROM 1 FOR 10), '.jpg' ), FLOOR(1 + RAND() * 10), NOW()),
-(FLOOR(1 + RAND() * 2), 'Tacos de Carnitas', 60, 3, 6, 'Cocinar la carne de cerdo lentamente con especias y servir en tortillas de maíz con cebolla y cilantro.', CONCAT( './images/', SUBSTRING(MD5(RAND()) FROM 1 FOR 10), '.jpg' ), FLOOR(1 + RAND() * 10), NOW()),
-(FLOOR(1 + RAND() * 2), 'Risotto de Champiñones', 45, 2, 3, 'Cocinar arroz con caldo de champiñones, agregar champiñones salteados y queso parmesano.', CONCAT( './images/', SUBSTRING(MD5(RAND()) FROM 1 FOR 10), '.jpg' ), FLOOR(1 + RAND() * 10), NOW()),
-(FLOOR(1 + RAND() * 2), 'Pastel de Chocolate', 60, 3, 8, 'Hornear un pastel de chocolate con glaseado de vainilla y decorar con fresas.', CONCAT( './images/', SUBSTRING(MD5(RAND()) FROM 1 FOR 10), '.jpg' ), FLOOR(1 + RAND() * 10), NOW())
+(FLOOR(1 + RAND() * 2), 'Pasta Carbonara', 30, 2, 4, 'Cocinar la pasta y mezclar con una salsa de huevo, queso parmesano y panceta.', './images/default.jpg', FLOOR(1 + RAND() * 10), NOW()),
+(FLOOR(1 + RAND() * 2), 'Ensalada César', 15, 1, 2, 'Preparar lechuga, crutones, pollo a la parrilla y aderezo de anchoas.', './images/default.jpg', FLOOR(1 + RAND() * 10), NOW()),
+(FLOOR(1 + RAND() * 2), 'Tacos de Carnitas', 60, 3, 6, 'Cocinar la carne de cerdo lentamente con especias y servir en tortillas de maíz con cebolla y cilantro.', './images/default.jpg', FLOOR(1 + RAND() * 10), NOW()),
+(FLOOR(1 + RAND() * 2), 'Risotto de Champiñones', 45, 2, 3, 'Cocinar arroz con caldo de champiñones, agregar champiñones salteados y queso parmesano.', './images/default.jpg', FLOOR(1 + RAND() * 10), NOW()),
+(FLOOR(1 + RAND() * 2), 'Pastel de Chocolate', 60, 3, 8, 'Hornear un pastel de chocolate con glaseado de vainilla y decorar con fresas.', './images/default.jpg', FLOOR(1 + RAND() * 10), NOW())
 ;
 
 -- Categorias
