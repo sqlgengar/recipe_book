@@ -15,7 +15,7 @@ typedef struct
     int parts;
     char preparation[2000];
     char image[100];
-    short int score;
+    int score;
     char date_update[5];
     char date[20];
     short int status;
@@ -29,7 +29,8 @@ void init_files();
 void load_paths();
 void main_menu();
 void menu_recipes();
-bool check_update_field( int );
+bool check_update_string( char[] );
+bool check_update_int( int );
 
 /*******************[MAIN]*********************/
 int main()
@@ -175,14 +176,36 @@ void menu_recipes()
 
             // EDIT RECIPE
             case 2:
-                printf( "Ingrese el número de la receta que desea modificar:\n" );
+                // select id
+                int temp_int =              0;
+                char* temp_string =         NULL;
                 size_t id_register_update = 0;
+                
+                printf( "Ingrese el número de la receta que desea modificar:\n" );
                 scanf( " %zu", &id_register_update );
                 fflush( stdin );
 
-                printf( "Nuevo nombre: " );
-                scanf( "%s", memory_recipes[id_register_update-1].name );
+                // update name
+                printf( "Nuevo nombre: [0 para no editar]\n" );
+                scanf( " %s", temp_string );
                 fflush( stdin );
+
+                if( check_update_string ) strcpy( memory_recipes[id_register_update - 1].name, temp_string );
+
+                // update duration
+                printf( "Nuevo tiempo de preparacion: [0 para no editar]\n" );
+                scanf( " %d", temp_int );
+                fflush( stdin );
+
+                if( check_update_int ) memory_recipes[id_register_update - 1].duration = temp_int;
+
+                // update level
+                printf( "Nuevo tiempo de preparacion: [0 para no editar]\n" );
+                scanf( " %d", temp_int );
+                fflush( stdin );
+
+                if( check_update_int ) memory_recipes[id_register_update - 1].duration = temp_int;
+
             break;
 
             // DELETE RECIPE
