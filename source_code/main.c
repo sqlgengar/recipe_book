@@ -266,10 +266,10 @@ void menu_recipes()
             // ADD RECIPE
             case 4:
                 int temp_id = 0;
-                int ids[];
+                int ids[100];
 
                 // resolucion del id de la tabla
-                printf( "Ingrese autoincrement: [0 para valor automatico]\n" );
+                printf( "Ingrese el id: [0 para valor automatico]\n" );
                 scanf( " %d", &temp_id );
                 fflush( stdin );
 
@@ -278,10 +278,9 @@ void menu_recipes()
                     ids[k] = memory_recipes[k].id;
                 }
 
-                if( is_repeat( ids, temp_id ) )
+                if( is_repeat( ids, temp_id, amount_recipes ) )
                 {
                     printf( "Id repedito, operacion no permitida.\n" );
-                    break;
                 }
                 else
                 {
@@ -293,46 +292,43 @@ void menu_recipes()
                 // Aumentar un espacio de memoria.
                 memory_recipes = realloc( memory_recipes, amount_recipes * sizeof( Recipes ) );
 
-                // Registar id.
+                // Registrar id.
                 memory_recipes[amount_recipes - 1].id = autoincrement_recipes;
 
-                // Registar id_user.
+                // Registrar id_user.
                 memory_recipes[amount_recipes - 1].id_user = 1;
 
-                // Registar name.
+                // Registrar name.
                 printf( "Ingrese nombre de la receta:\n" );
                 getchar();
                 fgets( memory_recipes[amount_recipes - 1].name, sizeof( memory_recipes[amount_recipes - 1].name ), stdin );
                 memory_recipes[amount_recipes - 1].name[strcspn( memory_recipes[amount_recipes - 1].name, "\n" )] = '\0';
                 fflush( stdin );
-
-                // Registar dutarion.
+                
+                // Registrar dutarion.
                 do
                 {
                     printf( "Ingrese duracion de receta:\n" );
-                    scanf( " %d", memory_recipes[amount_recipes - 1].duration );
+                    scanf( " %d", &memory_recipes[amount_recipes - 1].duration );
                     fflush( stdin );
-                } while( memory_recipes[amount_recipes - 1].duration >= 0 );
+                } while( memory_recipes[amount_recipes - 1].duration <= 0 );
 
                 // Registrar level.
                 printf( "Ingrese el nivel de la receta:\n" );
-                scanf( " %d", memory_recipes[amount_recipes - 1].level );
+                scanf( " %d", &memory_recipes[amount_recipes - 1].level );
                 fflush( stdin );
 
                 // Registrar parts.
                 do
                 {
-                    printf( "Ingrese cuantas procuones rinde la receta:\n" );
-                    scanf( " %d", memory_recipes[amount_recipes - 1].parts );
+                    printf( "Ingrese cuantas prociones rinde la receta:\n" );
+                    scanf( " %d", &memory_recipes[amount_recipes - 1].parts );
                     fflush( stdin );
-                } while( memory_recipes[amount_recipes - 1].parts >= 0 );
-
+                } while( memory_recipes[amount_recipes - 1].parts <= 0 );
+                
                 // Registrar preparation.
                 printf( "Ingrese la preparion de la receta:\n" );
-                getchar();
                 fgets( memory_recipes[amount_recipes - 1].preparation, sizeof( memory_recipes[amount_recipes - 1].preparation ), stdin );
-                memory_recipes[amount_recipes - 1].preparation[strcspn( memory_recipes[amount_recipes - 1].preparation, "\n" )] = '\0';
-                fflush( stdin );
 
                 // Registrar image.
                 strcpy( memory_recipes[amount_recipes -1].image, "./images/default.jpg" );
@@ -341,16 +337,16 @@ void menu_recipes()
                 memory_recipes[amount_recipes - 1].score = 0;
 
                 // Registrar date_update.
-                memory_recipes[amount_recipes - 1].date_update = NULL;
-
+                strcpy( memory_recipes[amount_recipes - 1].date_update, '\0' );
+                
                 // Registrar date.
                 time_t current;
                 struct tm* info_time;
                 time( &current );
                 info_time = localtime( &current );
 
-                strtime( memory_recipes[amount_registers - 1].date, sizeof( memory_recipes[amount_registers - 1].date ), "%Y-%m-%d %H:%M:%S", info_time );
-
+                strftime( memory_recipes[amount_recipes - 1].date, sizeof( memory_recipes[amount_recipes - 1].date ), "%Y-%m-%d %H:%M:%S", info_time );
+                
                 // Registrar status.
                 memory_recipes[amount_recipes - 1].status = true;
 
@@ -358,7 +354,6 @@ void menu_recipes()
                 amount_recipes++;
             break;
 
-            // EXIT
             default:
                 flag_recipes_cicle = false;
             break;
@@ -374,18 +369,18 @@ void menu_recipes()
     return;
 }
 
-void update_date_register( char register_date[] )
+void update_date_register( char register_date[11] )
 {
     time_t current_time;
     struct tm *time_info;
     time(&current_time);
     time_info = localtime(&current_time);
-    strftime( register_date, sizeof( register_date ), "%Y-%m-%d", time_info );
+    strftime( register_date, sizeof( register_date[11] ), "%Y-%m-%d", time_info );
 }
 
 bool is_repeat( int ids[], int find_id, int amount_registers )
 {
-    bool repeated = false
+    bool repeated = false;
 
     for( int i = 0; i < amount_registers; i++ )
     {
