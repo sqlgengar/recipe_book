@@ -125,6 +125,7 @@ void menu_recipes()
     bool flag_recipes_cicle =           true;
     short int option_recipes_cicle =    0;
     short int autoincrement_recipes =   1;
+    int cleaner_buffer =                0;
 
     // CARGAR MEMORIA
     stream_recipes = fopen( PATH_RECIPES, "rb" );
@@ -181,9 +182,9 @@ void menu_recipes()
             // EDIT RECIPE
             case 2:
                 // select id
+                char temp_string[80];
                 int temp_int =              0;
                 bool is_update =            false;
-                char* temp_string =         NULL;
                 size_t id_register_update = 0;
                 
                 printf( "Ingrese el número de la receta que desea modificar:\n" );
@@ -192,10 +193,14 @@ void menu_recipes()
 
                 // update name
                 printf( "Nuevo nombre: [0 para no editar]\n" );
-                scanf( " %s", temp_string );
-                fflush( stdin );
+                getchar();
+                fgets( temp_string, sizeof( temp_string ), stdin );
+                temp_string[strcspn( temp_string, "\n" )] = '\0';
+                
+                cleaner_buffer = 0;
+                while( ( cleaner_buffer = getchar() ) != '\n' && cleaner_buffer != EOF );
 
-                if( check_update_string )
+                if( check_update_string( temp_string ) )
                 {
                     strcpy( memory_recipes[id_register_update - 1].name, temp_string );
                     is_update = true;
@@ -206,18 +211,18 @@ void menu_recipes()
                 scanf( " %d", &temp_int );
                 fflush( stdin );
 
-                if( check_update_int )
+                if( check_update_int( temp_int ) )
                 {
                     memory_recipes[id_register_update - 1].duration = temp_int;
                     is_update = true;
                 }
 
                 // update level
-                printf( "Nuevo tiempo de preparacion: [0 para no editar]\n" );
+                printf( "Nuevo nivel de dificiltad: [0 para no editar]\n" );
                 scanf( " %d", &temp_int );
                 fflush( stdin );
 
-                if( check_update_int )
+                if( check_update_int( temp_int ) )
                 {
                     memory_recipes[id_register_update - 1].level = temp_int;
                     is_update = true;
@@ -228,7 +233,7 @@ void menu_recipes()
                 scanf( " %d", &temp_int );
                 fflush( stdin );
 
-                if( check_update_int )
+                if( check_update_int( temp_int ) )
                 {
                     memory_recipes[id_register_update - 1].parts = temp_int;
                     is_update = true;
@@ -236,14 +241,20 @@ void menu_recipes()
 
                 // update preparation
                 printf( "Nuevo script de preparacion: [0 para no editar]\n" );
-                scanf( " %s", temp_string );
-                fflush( stdin );
+                getchar();
+                fgets( temp_string, sizeof( temp_string ), stdin );
+                temp_string[strcspn( temp_string, "\n" )] = '\0';
 
-                if( check_update_int )
+                cleaner_buffer = 0;
+                while( ( cleaner_buffer = getchar() ) != '\n' && cleaner_buffer != EOF );
+
+                if( check_update_string( temp_string ) )
                 {
                     strcpy( memory_recipes[id_register_update - 1].preparation, temp_string );
                     is_update = true;
                 }
+
+                printf( " is_update=%d ", is_update );
 
                 // update date register
                 if( is_update ) update_date_register( memory_recipes[id_register_update - 1].date_update );
@@ -369,13 +380,31 @@ void menu_recipes()
     return;
 }
 
+bool check_update_string( char string[] )
+{
+    bool is_update = false;
+
+    if( strcmp( string, "0" ) != 0 ) is_update = true;
+
+    return is_update;
+}
+
+bool check_update_int( int value )
+{
+    bool is_update = false;
+
+    if( value != 0 ) is_update = true;
+
+    return is_update;
+}
+
 void update_date_register( char register_date[11] )
 {
     time_t current_time;
     struct tm *time_info;
     time(&current_time);
     time_info = localtime(&current_time);
-    strftime( register_date, sizeof( register_date[11] ), "%Y-%m-%d", time_info );
+    strftime( register_date, 11, "%Y-%m-%d", time_info );
 }
 
 bool is_repeat( int ids[], int find_id, int amount_registers )
