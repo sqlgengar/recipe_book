@@ -1,3 +1,40 @@
+/**
+ * Programa Modular en C
+ * ======================
+ * 
+ * Este programa está diseñado para admitir la incorporación de módulos adicionales.
+ * 
+ * **Estructuras de Tablas:**
+ * Las nuevas estructuras para las tablas deben ubicarse en el directorio `ESTRUCTURAS`.
+ * 
+ * **Constantes:**
+ * Se añaden nuevas constantes por cada tabla con el path de cada archivo en el directorio `CONSTANTES`.
+ * 
+ * **Inicialización de Archivos:**
+ * En `INIT_FILES` se pueden agregar todos los archivos que se crean por defecto con el programa.
+ * 
+ * **Carga de Paths:**
+ * `LOAD_PATHS` se utiliza para cargar en constantes los paths de los archivos de persistencia. 
+ * Para esto, edita el archivo `./files/path_files.txt`, siguiendo la estructura: `{CONSTANT_NAME}=./files/{table}.dat`.
+ * 
+ * **Menú Principal:**
+ * En `MAIN_MENU` se debe agregar una opción nueva para cada módulo.
+ * Agrega un `MENU_{TABLE}` por cada nuevo módulo, donde se especificarán las operaciones permitidas.
+ * 
+ * **Funciones Genéricas:**
+ * Se han creado funciones abstractas para su uso en todos los módulos:
+ *   - `check_update_string`: Para verificar que el usuario realmente quiere actualizar el campo de un string.
+ *   - `check_update_int`: Para verificar que el usuario realmente quiere actualizar el campo de un entero.
+ *   - `is_repeat`: Para evitar que los usuarios ingresen IDs repetidos al crear nuevos registros.
+ *   - `find_autoincrement`: Para calcular el autoincremental de la tabla.
+ * 
+ * **Operaciones con Memoria Dinámica:**
+ * La idea es que al ingresar a cada módulo, se lea el archivo binario de persistencia correspondiente y se cargue en memoria dinámica.
+ * Todas las operaciones dentro del módulo trabajan directamente con la memoria dinámica.
+ * Solamente al salir del módulo se escriben los cambios en disco.
+ * 
+ */
+
 /*******************[LIBRERIAS]*********************/
 #include <time.h>
 #include <stdio.h>
@@ -124,7 +161,7 @@ void menu_recipes()
     size_t amount_recipes =             0;
     bool flag_recipes_cicle =           true;
     short int option_recipes_cicle =    0;
-    short int autoincrement_recipes =   1;
+    int autoincrement_recipes =         1;
     int cleaner_buffer =                0;
 
     // CARGAR MEMORIA
@@ -254,8 +291,6 @@ void menu_recipes()
                     is_update = true;
                 }
 
-                printf( " is_update=%d ", is_update );
-
                 // update date register
                 if( is_update ) update_date_register( memory_recipes[id_register_update - 1].date_update );
             break;
@@ -276,7 +311,8 @@ void menu_recipes()
 
             // ADD RECIPE
             case 4:
-                int temp_id = 0;
+                int temp_id =           0;
+                int cleaner_buffer =    0;
                 int ids[100];
 
                 // resolucion del id de la tabla
@@ -301,6 +337,7 @@ void menu_recipes()
                 if( temp_id == 0 ) autoincrement_recipes = find_autoincrement( ids, amount_recipes );
 
                 // Aumentar un espacio de memoria.
+                amount_recipes++;
                 memory_recipes = realloc( memory_recipes, amount_recipes * sizeof( Recipes ) );
 
                 // Registrar id.
@@ -314,7 +351,8 @@ void menu_recipes()
                 getchar();
                 fgets( memory_recipes[amount_recipes - 1].name, sizeof( memory_recipes[amount_recipes - 1].name ), stdin );
                 memory_recipes[amount_recipes - 1].name[strcspn( memory_recipes[amount_recipes - 1].name, "\n" )] = '\0';
-                fflush( stdin );
+                cleaner_buffer = 0;
+                while( ( cleaner_buffer = getchar() ) != '\n' && cleaner_buffer != EOF );
                 
                 // Registrar dutarion.
                 do
@@ -336,10 +374,14 @@ void menu_recipes()
                     scanf( " %d", &memory_recipes[amount_recipes - 1].parts );
                     fflush( stdin );
                 } while( memory_recipes[amount_recipes - 1].parts <= 0 );
-                
+
                 // Registrar preparation.
                 printf( "Ingrese la preparion de la receta:\n" );
+                getchar();
                 fgets( memory_recipes[amount_recipes - 1].preparation, sizeof( memory_recipes[amount_recipes - 1].preparation ), stdin );
+                memory_recipes[amount_recipes - 1].preparation[strcspn( memory_recipes[amount_recipes - 1].preparation, "\n" )] = '\0';
+                cleaner_buffer = 0;
+                while( ( cleaner_buffer = getchar() ) != '\n' && cleaner_buffer != EOF );
 
                 // Registrar image.
                 strcpy( memory_recipes[amount_recipes -1].image, "./images/default.jpg" );
@@ -348,8 +390,8 @@ void menu_recipes()
                 memory_recipes[amount_recipes - 1].score = 0;
 
                 // Registrar date_update.
-                strcpy( memory_recipes[amount_recipes - 1].date_update, '\0' );
-                
+                strcpy( memory_recipes[amount_recipes - 1].date_update, "" );
+
                 // Registrar date.
                 time_t current;
                 struct tm* info_time;
@@ -357,14 +399,12 @@ void menu_recipes()
                 info_time = localtime( &current );
 
                 strftime( memory_recipes[amount_recipes - 1].date, sizeof( memory_recipes[amount_recipes - 1].date ), "%Y-%m-%d %H:%M:%S", info_time );
-                
+
                 // Registrar status.
                 memory_recipes[amount_recipes - 1].status = true;
-
-                // Incrementar cantidad de recetas.
-                amount_recipes++;
             break;
 
+            // EXIT
             default:
                 flag_recipes_cicle = false;
             break;
@@ -425,12 +465,5 @@ bool is_repeat( int ids[], int find_id, int amount_registers )
 
 int find_autoincrement( int ids[], int amount_registers )
 {
-    int autoincrement = 1;
-
-    for( int i = 0; i < amount_registers; i++ )
-    {
-        autoincrement++;
-    }
-
-    return autoincrement;
+    return ( amount_registers + 1 );
 }
