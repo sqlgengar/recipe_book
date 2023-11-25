@@ -23,14 +23,11 @@ SELECT
             C.id as 'id_category',
             C.name as 'name_category'
 FROM
-            recipes R,
-            recipe_categories RC,
-            categories C
+            recipes R
+INNER JOIN (recipe_categories RC, categories C) 
+			ON (R.id = RC.id_recipe AND RC.id_category = C.id)
+
 WHERE
-            R.id = RC.id_recipe
-            AND
-            RC.id_category = C.id
-            AND
             R.status = 1
             AND
             R.name != ''
@@ -47,15 +44,18 @@ LIMIT
             500
 ;
 
+
 -- Mostrar todos los ingredientes con sus unidades asociadas.
 SELECT
             I.id as 'id_ingredient',
             I.name as 'name_ingredient',
-            ( SELECT U.id FROM units U WHERE U.id = I.id_unit LIMIT 1 ) as 'id_unit',
-            ( SELECT U.unit FROM units U WHERE U.id = I.id_unit LIMIT 1 ) as 'unit',
-            ( SELECT U.name FROM units U WHERE U.id = I.id_unit LIMIT 1 ) as 'name_unit'
+            U.unit as 'unit',
+            U.name as 'name_unit'
 FROM
             ingredients I
+INNER JOIN units U
+		ON U.id = I.id_unit
+
 WHERE
             I.status = 1
             AND
@@ -65,6 +65,12 @@ ORDER BY
 LIMIT
             1000
 ;
+
+-- Mostrar recetas con sus ingredientes y los tipos de medidas con Inner Join--
+Select R.id, R.name as receta, RI.amount cantidad, I.name as ingrediente, U.name tipo
+From recipes R
+Inner Join (recipe_ingredients RI, ingredients I, units U) ON (R.id = RI.id_recipe AND RI.id_ingredient = I.id AND I.id_unit = U.id)
+
 
 -- Mostrar solo recetas creadas por Gordon Ramsay, de duration menor o igual a 15 minutos, que sean de level easy, que rinda mas de 4 porciones, con score superior o igual a 7, actualizadas en los ultimos 7 dias.
 SET @MAIL = ( SELECT U.email FROM users U WHERE U.name = 'Gordon Ramsay' AND U.status = 1 LIMIT 1 );
@@ -95,15 +101,16 @@ LIMIT
             25
 ;
 
--- Mostrar las 3 recetas con mayor cantidad de usuarios que las matarios como favoritos, y su score.
+-- Mostrar top de 3 recetas con mayor cantidad de usuarios que las marcaron como favoritos, y su score.
 SELECT
             COUNT( RF.id_recipe ) as 'amount_favorites',
             RF.id as 'id_recipe',
             R.name as 'name_recipe',
             R.score as 'score_recipe'
 FROM
-            recipes R,
-            recipe_favorites RF
+            recipes R
+INNER JOIN
+            recipe_favorites RF ON R.id = RF.id_recipe
 WHERE
             R.id = RF.id_recipe
             AND
@@ -125,14 +132,12 @@ SELECT
             I.name as 'name_ingredient',
             CONCAT( RI.amount, ' ', ( SELECT U.unit FROM units U WHERE U.id = I.id_unit LIMIT 1 ) ) as 'consume'
 FROM
-            recipes R,
-            recipe_ingredients RI,
-            ingredients I
+            recipes R
+            
+INNER JOIN (recipe_ingredients RI, ingredients I) 
+			ON (R.id = RI.id_recipe AND RI.id_ingredient = I.id)
+
 WHERE
-            R.id = RI.id_recipe
-            AND
-            RI.id_ingredient = I.id
-            AND
             R.status = 1
             AND
             RI.status = 1
@@ -153,11 +158,12 @@ SELECT
             U.name as 'name user',
             U.email as 'email_user'
 FROM
-            users U,
-            roles R
+            users U
+            
+INNER JOIN roles R 
+			ON U.id_rol = R.id
+
 WHERE
-            U.id_rol = R.id
-            AND
             U.status = 1
             AND
             R.id = @ID_ADMIN
